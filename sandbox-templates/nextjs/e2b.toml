@@ -1,0 +1,17 @@
+# This is a config for E2B sandbox template.
+# You can use template ID (2ce5v1zsd2l2uf8miayt) or template name (viber-nextjs-harsh-test) to create a sandbox:
+
+# Python SDK
+# from e2b import Sandbox, AsyncSandbox
+# sandbox = Sandbox.create("viber-nextjs-harsh-test") # Sync sandbox
+# sandbox = await AsyncSandbox.create("viber-nextjs-harsh-test") # Async sandbox
+
+# JS SDK
+# import { Sandbox } from 'e2b'
+# const sandbox = await Sandbox.create('viber-nextjs-harsh-test')
+
+team_id = "02abf0b1-e449-4ca8-9ed4-e24f8ab38054"
+start_cmd = "/compile_page.sh"
+dockerfile = "e2b.Dockerfile"
+template_name = "viber-nextjs-harsh-test"
+template_id = "2ce5v1zsd2l2uf8miayt"
