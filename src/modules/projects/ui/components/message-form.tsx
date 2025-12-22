@@ -6,10 +6,12 @@ import z from "zod";
 import { toast } from "sonner";
 import { ArrowUp, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import { Form, FormField } from "@/components/ui/form";
+import { Usage } from "./usage";
+import { useRouter } from "next/navigation";
 
 interface Props {
   projectId: string;
@@ -23,11 +25,14 @@ const formSchema = z.object({
 });
 
 export const MessageForm = ({ projectId }: Props) => {
+  const router = useRouter();
   const [isFocused, setIsFocused] = useState(false);
-  const showUsage = false;
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+
+  const { data: usage } = useQuery(trpc.usage.status.queryOptions());
+  const showUsage = !!usage;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,11 +48,13 @@ export const MessageForm = ({ projectId }: Props) => {
         queryClient.invalidateQueries(
           trpc.messages.getMany.queryOptions({ projectId })
         );
-        // TODO: invalidate usage status
+        queryClient.invalidateQueries(trpc.usage.status.queryOptions());
       },
       onError: (error) => {
-        // TODO: redirect to pricing page if specific error
-        toast.error(error.message);
+        if (error.data?.code === "TOO_MANY_REQUESTS") {
+          router.push("/pricing");
+          toast.error("You have run out of credits");
+        }
       },
     })
   );
@@ -64,6 +71,12 @@ export const MessageForm = ({ projectId }: Props) => {
 
   return (
     <Form {...form}>
+      {showUsage && (
+        <Usage
+          points={usage.remainingPoints}
+          msBeforeNext={usage.msBeforeNext}
+        />
+      )}
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn(
